@@ -64,25 +64,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         return questions;
     }
 
-    function displayQuestion(question) {
+    function displayQuestion(question, currentIndex, totalQuestions, onNextQuestion) {
         const questionElement = document.getElementById('question');
         const answerContainer = document.getElementById('answerContainer');
 
-        questionElement.textContent = question.question;
+        questionElement.textContent = `Question ${currentIndex + 1}/${totalQuestions}: ${question.question}`;
         answerContainer.innerHTML = '';
 
         if (question.type === 'multiple-choice') {
             question.options.forEach(option => {
                 const button = document.createElement('button');
                 button.textContent = option;
-                button.onclick = () => alert(option === question.correctAnswer ? 'Correct!' : 'Wrong!');
+                button.onclick = () => {
+                    const isUserCorrect = (option === question.correctAnswer);
+                    alert(isUserCorrect ? 'True!' : 'False!')
+                    onNextQuestion(isUserCorrect);
+                };
                 answerContainer.appendChild(button);
             });
         } else if (question.type === 'true-false') {
             ['True', 'False'].forEach(option => {
                 const button = document.createElement('button');
                 button.textContent = option;
-                button.onclick = () => alert((option === 'True') === question.correctAnswer ? 'Correct!' : 'Wrong!');
+                button.onclick = () => {
+                    const isUserCorrect = ((option === 'True') === question.correctAnswer);
+                    alert(isUserCorrect ? 'True!' : 'False!')
+                    onNextQuestion(isUserCorrect);
+                };
                 answerContainer.appendChild(button);
             });
         } else if (question.type === 'image-recognition') {
@@ -96,15 +104,44 @@ document.addEventListener('DOMContentLoaded', async () => {
             input.type = 'text';
             const button = document.createElement('button');
             button.textContent = 'Submit';
-            button.onclick = () => alert(input.value === question.correctAnswer ? 'Correct!' : 'Wrong!');
+            button.onclick = () => {
+                const isUserCorrect = (input.value === question.correctAnswer);
+                alert(isUserCorrect ? 'True!' : 'False!')
+                onNextQuestion(isUserCorrect);
+            };
             answerContainer.appendChild(input);
             answerContainer.appendChild(button);
         }
     }
 
-    const questions = await getTopArtistQuestion();
-    
-    if (questions && questions.length > 0) {
-        displayQuestion(questions[0]);
+    async function startQuiz() {
+        const questions = await getTopArtistQuestion();
+        if (!questions || questions.length === 0) return;
+
+        let currentIndex = 0;
+        let score = 0;
+
+        function handleNextQuestion(isUserCorrect) {
+            if (isUserCorrect) score++;
+            currentIndex++;
+
+            if (currentIndex < questions.length) {
+                displayQuestion(questions[currentIndex], currentIndex, questions.length, handleNextQuestion);
+            } else {
+                displayScore(score, questions.length);
+            }
+        }
+
+        displayQuestion(questions[0], currentIndex, questions.length, handleNextQuestion);
     }
+
+    function displayScore(score, total) {
+        const questionElement = document.getElementById('question');
+        const answerContainer = document.getElementById('answerContainer');
+
+        questionElement.textContent = `Quiz Completed! Your score is ${score}/${total}.`;
+        answerContainer.innerHTML = '';
+    }
+
+    startQuiz();
 });
