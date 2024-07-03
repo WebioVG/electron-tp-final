@@ -1,8 +1,10 @@
 # Installation
 
-Se placer dans le dossier de projet et lancer les commandes suivantes :
-
-- `npm install`
-- `npm run start`
+- Ouvrir un terminal bash
+- Cloner le projet
+- Se placer à la racine du projet
+- Lancer les commandes suivantes :
+    - `npm install`
+    - `npm run start`
 
 C'est prêt !
